@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { v4 as uuidv4 } from "uuid";
 
 const router = Router();
 
@@ -20,7 +19,20 @@ router.post("/", async (req, res) => {
     text: req.body.text,
     userId: req.context.me.id,
   });
+  return res.send(message);
+});
 
+router.put("/:messageId", async (req, res) => {
+  const response = await req.context.models.Message.update(
+    {
+      text: req.body.text,
+    },
+    {
+      where: { id: req.params.messageId },
+      returning: true,
+    },
+  );
+  const message = response[1][0];
   return res.send(message);
 });
 
@@ -28,7 +40,6 @@ router.delete("/:messageId", async (req, res) => {
   const result = await req.context.models.Message.destroy({
     where: { id: req.params.messageId },
   });
-
   return res.send(true);
 });
 

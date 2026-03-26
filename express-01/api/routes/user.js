@@ -12,16 +12,34 @@ router.get("/:userId", async (req, res) => {
   return res.send(user);
 });
 
-router.post("/", (req, res) => {
-  return res.send("POST HTTP method on user resource");
+router.post("/", async (req, res) => {
+  const user = await req.context.models.User.create({
+    username: req.body.username,
+    email: req.body.email,
+  });
+  return res.send(user);
 });
 
-router.put("/:userId", (req, res) => {
-  return res.send(`PUT HTTP method on user/${req.params.userId} resource`);
+router.put("/:userId", async (req, res) => {
+  const response = await req.context.models.User.update(
+    {
+      username: req.body.username,
+      email: req.body.email,
+    },
+    {
+      where: { id: req.params.userId },
+      returning: true,
+    },
+  );
+  const user = response[1][0];
+  return res.send(user);
 });
 
-router.delete("/:userId", (req, res) => {
-  return res.send(`DELETE HTTP method on user/${req.params.userId} resource`);
+router.delete("/:userId", async (req, res) => {
+  const result = await req.context.models.User.destroy({
+    where: { id: req.params.userId },
+  });
+  return res.send(true);
 });
 
 export default router;
